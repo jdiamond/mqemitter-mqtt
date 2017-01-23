@@ -1,0 +1,14 @@
+{
+  "name": "mqemitter-mqtt",
+  "version": "1.0.0",
+  "description": "MQEmitter that connects to upstream MQTT broker",
+  "main": "index.js",
+  "keywords": [ "mqtt", "mqemitter" ],
+  "author": "Jason Diamond <jason@diamond.name>",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^2.6.0",
+    "mqemitter": "^2.0.2",
+    "mqtt": "^2.2.1"
+  }
+}
