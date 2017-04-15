@@ -1,109 +1,70 @@
-'use strict'
+'use strict';
 
-const mqtt = require('mqtt')
-const MQEmitter = require('mqemitter')
-const debug = require('debug')('mqemitter-mqtt')
+const mqtt = require('mqtt');
+const MQEmitter = require('mqemitter');
+const debug = require('debug')('mqemitter-mqtt');
+
+function noop() {}
 
 class MQEmitterMQTT extends MQEmitter {
-  constructor(opts={}) {
-    super()
+  constructor(opts = {}) {
+    super();
 
-    this._opts = opts
-    this._upstream = mqtt.connect(opts.url, opts)
-    this._subs = new Map()
+    this._opts = opts;
+    this._upstream = mqtt.connect(opts.url, opts);
+
+    if (opts.topics) {
+      debug(`subscribing to: ${JSON.stringify(opts.topics)}`);
+
+      this._upstream.subscribe(
+        opts.topics,
+        { qos: opts.qos },
+        (err, granted) => {
+          if (!err) {
+            debug(`granted: ${JSON.stringify(granted)}`);
+          }
+        }
+      );
+    }
 
     this._upstream.on('connect', () => {
-      debug('connected to upstream')
-    })
+      debug('connected to upstream');
+    });
 
     this._upstream.on('message', (topic, payload) => {
-      debug(`received message on ${topic} from upstream`)
+      debug(`received message on ${topic} from upstream`);
 
-      super.emit({ topic, payload })
-    })
+      super.emit({ topic, payload });
+    });
 
     this._upstream.on('error', err => {
-      console.log(err)
-    })
+      debug(err);
+    });
   }
 
-  on(topic, notify, cb=noop) {
-    debug(`subscribing to ${topic}`)
+  emit(msg, cb = noop) {
+    debug(`publishing to ${msg.topic}`);
 
-    super.on(topic, notify, (err) => {
-      if (err) {
-        return cb(err)
-      }
+    this._upstream.publish(
+      msg.topic,
+      msg.payload,
+      {
+        qos: msg.qos,
+        retain: msg.retain,
+      },
+      cb
+    );
 
-      const count = this._subs.get(topic) || 0
-
-      if (count > 0) {
-        debug(`already subscribed to ${topic} on upstream`)
-
-        this._subs.set(topic, count + 1)
-
-        return cb()
-      }
-
-      debug(`subscribing to ${topic} on upstream`)
-
-      this._subs.set(topic, 1)
-      this._upstream.subscribe(topic, { qos: 0 }, cb)
-    })
-
-    return this
+    return this;
   }
 
-  removeListener(topic, notify, cb=noop) {
-    super.removeListener(topic, notify, (err) => {
-      if (err) {
-        return cb(err)
-      }
+  close(cb = noop) {
+    debug('closing upstream');
 
-      const count = this._subs.get(topic) || 0
+    this._upstream.end(cb);
 
-      if (count < 1) {
-        debug(`removeListener called but not subscribed to ${topic} on upstream`)
-
-        return cb()
-      }
-
-      this._subs.set(topic, count - 1)
-
-      if (count > 1) {
-        debug(`staying subscribed to ${topic} on upstream`)
-
-        return cb()
-      }
-
-      debug(`unsubscribing from ${topic} on upstream`)
-
-      this._upstream.unsubscribe(topic, cb)
-    })
-
-    return this
-  }
-
-  emit(msg, cb=noop) {
-    debug(`publishing to ${msg.topic} on upstream`)
-
-    this._upstream.publish(msg.topic, msg.payload, {
-      qos: msg.qos,
-      retain: msg.retain
-    }, cb)
-
-    return this
-  }
-
-  close(cb=noop) {
-    debug(`closing upstream`)
-
-    this._upstream.end(cb)
-
-    return this
+    return this;
   }
 }
 
-function noop () {}
-
-module.exports = MQEmitterMQTT
+module.exports = MQEmitterMQTT;
