@@ -6,6 +6,12 @@ from that broker will be republished to clients on the local broker.
 Messages published by clients connected to the local broker are republished to
 the remote broker.
 
+Install (don't forget to also install MQTT.js):
+
+```
+npm install mqemitter-mqtt mqtt
+```
+
 Example:
 
 ```
