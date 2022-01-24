@@ -10,8 +10,8 @@
   "author": "Jason Diamond <jason@diamond.name>",
   "license": "MIT",
   "dependencies": {
-    "debug": "3.1.0",
-    "mqemitter": "2.2.0"
+    "debug": "4.3.3",
+    "mqemitter": "4.5.0"
   },
   "peerDependencies": {
     "mqtt": "*"
