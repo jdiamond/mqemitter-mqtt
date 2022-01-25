@@ -1,6 +1,6 @@
 {
   "name": "mqemitter-mqtt",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "MQEmitter that connects to upstream MQTT broker",
   "main": "index.js",
   "keywords": [
