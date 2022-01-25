@@ -14,7 +14,7 @@ npm install mqemitter-mqtt mqtt
 
 Example:
 
-```
+```javascript
 const aedes = require('aedes');
 const MQEmitterMQTT = require('mqemitter-mqtt');
 const fs = require('fs');
@@ -34,6 +34,15 @@ const server = aedes({
     // These options go to 'mqtt.Client#subscribe()':
     topics: 'my/topics/#',
     qos: 1,
+
+    // These options let you modify the topic and payload
+    // sent to/received from upstream:
+    transformToUpstream({ topic, payload }) {
+      return { topic, payload };
+    },
+    transformFromUpstream({ topic, payload }) {
+      return { topic, payload };
+    },
   }),
 });
 ```
